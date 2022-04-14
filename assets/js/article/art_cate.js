@@ -1,5 +1,6 @@
 $(function () {
     var layer = layui.layer
+    var form = layui.form
     initArtCateList()
 
 
@@ -21,8 +22,8 @@ $(function () {
         indexAdd = layer.open({
             type: 1,
             area: ['500px', '260px'],
-            title: '添加文章分类'
-            , content: $('#dialog-add').html()
+            title: '添加文章分类',
+            content: $('#dialog-add').html()
         });
     })
 
@@ -49,26 +50,34 @@ $(function () {
     $('tbody').on('click', '.btn-edit', function () {
 
         //弹出一个修改文章分类信息的层
-        var indexEdit = null
         indexEdit = layer.open({
             type: 1,
             area: ['500px', '260px'],
-            title: '修改文章分类'
-            , content: $('#dialog-edit').html()
+            title: '修改文章分类',
+            content: $('#dialog-edit').html()
         });
+        var id = $(this).attr('data-id')
 
-
-
-
+        //发起请求获取对应分类的数据
+        $.ajax({
+            method: 'GET',
+            url: '/my/article/cates/' + id,
+            success: function (res) {
+                if (res.status !== 0) {
+                    layer.msg('获取文章分类失败!')
+                }
+                form.val('form-edit', res.data)
+            }
+        })
 
     })
 
-       //通过代理的形式，为form-edit表单绑定submit事件
-       $('body').on('submit', '#form-edit', function (e) {
+    //通过代理的形式，为form-edit表单绑定submit事件
+    $('body').on('submit', '#form-edit', function (e) {
         e.preventDefault()
         $.ajax({
             method: 'POST',
-            url: '/my/article/addcates',
+            url: '/my/article/updatecate',
             data: $(this).serialize(),
             success: function (res) {
                 if (res.status !== 0) {
@@ -78,7 +87,31 @@ $(function () {
                 layer.msg('修改分类成功!')
                 //根据索引，关闭对应的弹出层
                 layer.close(indexEdit)
+                initArtCateList()
             }
+        })
+    })
+
+    //通过代理的形式，为删除按钮绑定点击事件
+    $('tbody').on('click', '.btn-delete', function () {
+       
+        var id = $(this).attr('data-id')
+ 
+        //提示用户是否要删除
+        layer.confirm('确认删除?', { icon: 3, title: '提示' }, function(index) {
+            //do something
+            $.ajax({
+                method: 'GET',
+                url: '/my/article/deletecate/' + id,
+                success: function (res) {
+                    if (res.status !== 0) {
+                        layer.msg('删除分类失败!')
+                    }
+                    layer.msg('删除分类成功!')
+                    layer.close(index)
+                    initArtCateList()
+                }
+            })
         })
     })
 })
