@@ -37,6 +37,8 @@ $(function () {
     initTable()
     initCate()
 
+
+
     //获取文章列表数据的方法
     function initTable() {
         $.ajax({
@@ -170,5 +172,10 @@ $(function () {
             })
             layer.close(index)
         })
+    })
+
+    //通过代理的形式，为编辑按钮绑定点击事件处理函数
+    $('tbody').on('click', '.btn-edit', function () {
+        location.href = '/article/art_edit.html?id=' +$(this).attr('data-id') 
     })
 })
